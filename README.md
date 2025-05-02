@@ -49,8 +49,8 @@ The MCP server tools call into various Tableau APIs, including
 the [Metadata API](https://help.tableau.com/current/api/metadata_api/en-us/index.html). To
 authenticate to these APIs, you must provide your credentials via environment variables.
 
-> [!TIP] When multiple credentials are provided, the order in which the below authentication methods
-> are listed is also the order of precedence used by the server. Provide the `AUTH_TYPE` environment
+> 💡 When multiple credentials are provided, the order in which the below authentication methods are
+> listed is also the order of precedence used by the server. Provide the `AUTH_TYPE` environment
 > variable to specify which authentication method to use. Allowed values are `auth-token`, `pat`,
 > `jwt`, `connected-app`, and `username-password`.
 
@@ -72,7 +72,7 @@ If you have a JWT generated using a
 [Direct Trust Connected App](https://help.tableau.com/current/online/en-us/connected_apps_direct.htm#step-3-configure-the-jwt),
 you can use it by setting the `JWT` environment variable.
 
-> [!IMPORTANT] Required scopes are:
+> ⚠️ Required scopes are:
 >
 > - `tableau:viz_data_service:read`
 > - `tableau:content:read`.
