@@ -1,0 +1,41 @@
+{
+  "name": "tableau-mcp",
+  "type": "module",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run lint && esbuild src/index.ts --bundle --packages=external --platform=node --format=esm --outdir=build --sourcemap && chmod 755 build/index.js",
+    "lint": "npm exec eslint",
+    "build-run": "npm run build && node build/index.js",
+    "inspect": "npx @modelcontextprotocol/inspector --config config.json --server tableau"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@zodios/core": "^10.9.6",
+    "dotenv": "^16.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "ts-results-es": "^5.0.1",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.25.1",
+    "@types/eslint__js": "^8.42.3",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.3",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "esbuild": "^0.25.3",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1"
+  }
+}

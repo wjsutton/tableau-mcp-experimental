@@ -1,0 +1,31 @@
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+
+import { config } from '../config.js';
+import { Query } from '../sdks/tableau/apis/vizqlDataServiceApi.js';
+import RestApi from '../sdks/tableau/restApi.js';
+import { getToolCallback, Tool } from './tool.js';
+
+export const queryDatasourceTool = new Tool({
+  name: 'query-datasource',
+  description: 'Run a Tableau VizQL query.',
+  paramsSchema: { query: Query },
+  callback: async ({ query }): Promise<CallToolResult> => {
+    return await getToolCallback(async () => {
+      const datasource = { datasourceLuid: config.datasourceLuid };
+      const options = {
+        returnFormat: 'OBJECTS',
+        debug: false,
+        disaggregate: false,
+      } as const;
+
+      const queryRequest = {
+        datasource,
+        query,
+        options,
+      };
+
+      const restApi = await RestApi.getNewInstanceAsync(config.server, config.authConfig);
+      return await restApi.vizqlDataServiceMethods.queryDatasource(queryRequest);
+    });
+  },
+});

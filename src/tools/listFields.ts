@@ -1,0 +1,35 @@
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+
+import { config } from '../config.js';
+import RestApi from '../sdks/tableau/restApi.js';
+import { getToolCallback, Tool } from './tool.js';
+
+export const listFieldsTools = new Tool({
+  name: 'list-fields',
+  description:
+    "Fetches field metadata (name, description) for the hard-wired datasource via Tableau's Metadata API, reusing the shared get_datasource_query function. Returns a list of field dicts or an error message.",
+  paramsSchema: {},
+  callback: async (): Promise<CallToolResult> => {
+    const query = `
+    query Datasources {
+      publishedDatasources(filter: { luid: "${config.datasourceLuid}" }) {
+        name
+        description
+        datasourceFilters { field { name description } }
+        fields { name description }
+      }
+    }`;
+
+    return await getToolCallback(async () => {
+      const restApi = await RestApi.getNewInstanceAsync(config.server, config.authConfig);
+      const response = await restApi.metadataMethods.graphql(query);
+      const published = response.data.publishedDatasources;
+
+      if (published.length) {
+        return response;
+      }
+
+      throw new Error('No published datasources in response', { cause: response });
+    });
+  },
+});

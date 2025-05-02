@@ -1,0 +1,59 @@
+import { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Err, Ok, Result } from 'ts-results-es';
+import { ZodRawShape } from 'zod';
+
+export type ToolParams<Args extends ZodRawShape | undefined = undefined> = {
+  name: string;
+  description: string;
+  paramsSchema: Args;
+  callback: ToolCallback<Args>;
+};
+
+export class Tool<Args extends ZodRawShape | undefined = undefined> {
+  name: string;
+  description: string;
+  paramsSchema: Args;
+  callback: ToolCallback<Args>;
+
+  constructor({ name, description, paramsSchema, callback }: ToolParams<Args>) {
+    this.name = name;
+    this.description = description;
+    this.paramsSchema = paramsSchema;
+    this.callback = callback;
+  }
+}
+
+export async function getToolCallback<T>(callback: () => Promise<T>): Promise<CallToolResult> {
+  const result = await getResult(callback);
+
+  if (result.isOk()) {
+    return {
+      isError: false,
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result.value),
+        },
+      ],
+    };
+  }
+
+  return {
+    isError: true,
+    content: [
+      {
+        type: 'text',
+        text: result.error.message,
+      },
+    ],
+  };
+}
+
+async function getResult<T>(callback: () => Promise<T>): Promise<Result<T, Error>> {
+  try {
+    return Ok(await callback());
+  } catch (error) {
+    return Err(error instanceof Error ? error : new Error(`${error}`));
+  }
+}
