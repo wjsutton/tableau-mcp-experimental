@@ -4,7 +4,7 @@ import { config } from '../config.js';
 import RestApi from '../sdks/tableau/restApi.js';
 import { getToolCallback, Tool } from './tool.js';
 
-export const listFieldsTools = new Tool({
+export const listFieldsTool = new Tool({
   name: 'list-fields',
   description:
     "Fetches field metadata (name, description) for the hard-wired datasource via Tableau's Metadata API, reusing the shared get_datasource_query function. Returns a list of field dicts or an error message.",
