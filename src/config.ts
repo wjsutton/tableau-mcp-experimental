@@ -71,24 +71,11 @@ class Config {
       return;
     }
 
-    if (username && password && siteName && (!authType || authType === 'username-password')) {
-      this.authConfig = {
-        type: 'username-password',
-        username,
-        password,
-        siteName,
-      };
-
-      return;
-    }
-
     if (
       username &&
       clientId &&
       secretId &&
       secretValue &&
-      siteName &&
-      scopes !== undefined &&
       (!authType || authType === 'direct-trust')
     ) {
       this.authConfig = {
@@ -98,7 +85,24 @@ class Config {
         secretId,
         secretValue,
         siteName,
-        scopes: scopes?.split(',') ?? [],
+        scopes: [
+          ...new Set([
+            'tableau:viz_data_service:read',
+            'tableau:content:read',
+            ...(scopes?.split(',') ?? []),
+          ]),
+        ],
+      };
+
+      return;
+    }
+
+    if (username && password && (!authType || authType === 'username-password')) {
+      this.authConfig = {
+        type: 'username-password',
+        username,
+        password,
+        siteName,
       };
 
       return;

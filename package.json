@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run lint && esbuild src/index.ts --bundle --packages=external --platform=node --format=esm --outdir=build --sourcemap && chmod 755 build/index.js",
     "lint": "npm exec eslint",
-    "build-run": "npm run build && node build/index.js",
+    "start": "node build/index.js",
     "inspect": "npx @modelcontextprotocol/inspector --config config.json --server tableau"
   },
   "keywords": [],
