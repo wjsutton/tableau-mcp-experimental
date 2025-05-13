@@ -1,14 +1,13 @@
-import { LoggingLevel } from '@modelcontextprotocol/sdk/types.js';
 import dotenv from 'dotenv';
 
-import { isLoggingLevel } from './logging/log.js';
 import { AuthConfig } from './sdks/tableau/authConfig.js';
+import invariant from './utils/invariant.js';
 
 class Config {
   server: string;
   datasourceLuid: string;
   authConfig: AuthConfig;
-  defaultLogLevel: LoggingLevel;
+  defaultLogLevel: string;
   disableLogMasking: boolean;
 
   constructor() {
@@ -32,22 +31,15 @@ class Config {
       DISABLE_LOG_MASKING: disableLogMasking,
     } = process.env;
 
-    this.defaultLogLevel = isLoggingLevel(defaultLogLevel) ? defaultLogLevel : 'debug';
+    this.defaultLogLevel = defaultLogLevel ?? 'debug';
     this.disableLogMasking = disableLogMasking === 'true';
 
-    const required = { server, datasourceLuid };
-    for (const [key, value] of Object.entries(required)) {
-      if (!value) {
-        throw new Error(`The environment variable ${key} is not set.`);
-      }
-    }
+    invariant(server, 'The environment variable SERVER is not set');
+    invariant(datasourceLuid, 'The environment variable DATASOURCE_LUID is not set');
+    invariant(siteName, 'The environment variable SITE_NAME is not set');
 
     this.server = server;
     this.datasourceLuid = datasourceLuid;
-
-    if (!siteName) {
-      throw new Error(`The environment variable SITE_NAME is not set.`);
-    }
 
     if (patName && patValue && (!authType || authType === 'pat')) {
       this.authConfig = {
@@ -113,4 +105,15 @@ class Config {
   }
 }
 
-export const config = new Config();
+let config: Config;
+export const getConfig = (): Config => {
+  if (!config) {
+    config = new Config();
+  }
+
+  return config;
+};
+
+export const exportedForTesting = {
+  Config,
+};
