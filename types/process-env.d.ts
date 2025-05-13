@@ -1,7 +1,6 @@
 export interface ProcessEnvEx {
   SERVER: string;
   DATASOURCE_LUID: string;
-  AUTH_TOKEN: string | undefined;
   USERNAME: string | undefined;
   PASSWORD: string | undefined;
   SITE_NAME: string | undefined;
@@ -13,6 +12,8 @@ export interface ProcessEnvEx {
   CONNECTED_APP_SECRET_VALUE: string | undefined;
   JWT_SCOPES: string | undefined;
   AUTH_TYPE: string | undefined;
+  DEFAULT_LOG_LEVEL: string | undefined;
+  DISABLE_LOG_MASKING: string | undefined;
 }
 
 declare global {

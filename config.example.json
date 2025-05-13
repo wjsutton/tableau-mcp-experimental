@@ -7,7 +7,6 @@
         "SERVER": "https://my-tableau-server.com",
         "DATASOURCE_LUID": "",
         "SITE_NAME": "",
-        "AUTH_TOKEN": "",
         "PAT_NAME": "",
         "PAT_VALUE": "",
         "JWT": "",
@@ -17,7 +16,8 @@
         "CONNECTED_APP_SECRET_ID": "",
         "CONNECTED_APP_SECRET_VALUE": "",
         "JWT_SCOPES": "",
-        "AUTH_TYPE": ""
+        "AUTH_TYPE": "",
+        "DEFAULT_LOG_LEVEL": "debug"
       }
     }
   }

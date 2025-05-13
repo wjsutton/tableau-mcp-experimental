@@ -1,11 +1,15 @@
+import { LoggingLevel } from '@modelcontextprotocol/sdk/types.js';
 import dotenv from 'dotenv';
 
+import { isLoggingLevel } from './logging/log.js';
 import { AuthConfig } from './sdks/tableau/authConfig.js';
 
 class Config {
   server: string;
   datasourceLuid: string;
   authConfig: AuthConfig;
+  defaultLogLevel: LoggingLevel;
+  disableLogMasking: boolean;
 
   constructor() {
     dotenv.config();
@@ -13,7 +17,6 @@ class Config {
     const {
       SERVER: server,
       DATASOURCE_LUID: datasourceLuid,
-      AUTH_TOKEN: authToken,
       SITE_NAME: siteName,
       PAT_NAME: patName,
       PAT_VALUE: patValue,
@@ -25,7 +28,12 @@ class Config {
       CONNECTED_APP_SECRET_VALUE: secretValue,
       JWT_SCOPES: scopes,
       AUTH_TYPE: authType,
+      DEFAULT_LOG_LEVEL: defaultLogLevel,
+      DISABLE_LOG_MASKING: disableLogMasking,
     } = process.env;
+
+    this.defaultLogLevel = isLoggingLevel(defaultLogLevel) ? defaultLogLevel : 'debug';
+    this.disableLogMasking = disableLogMasking === 'true';
 
     const required = { server, datasourceLuid };
     for (const [key, value] of Object.entries(required)) {
@@ -36,15 +44,6 @@ class Config {
 
     this.server = server;
     this.datasourceLuid = datasourceLuid;
-
-    if (authToken && (!authType || authType === 'auth-token')) {
-      this.authConfig = {
-        type: 'auth-token',
-        authToken,
-      };
-
-      return;
-    }
 
     if (!siteName) {
       throw new Error(`The environment variable SITE_NAME is not set.`);

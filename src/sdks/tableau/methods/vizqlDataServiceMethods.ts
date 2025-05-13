@@ -1,19 +1,15 @@
+import { Zodios } from '@zodios/core';
 import { z } from 'zod';
 
-import {
-  getApiClient,
-  QueryOutput,
-  QueryRequest,
-  VizqlDataServiceApiClient,
-} from '../apis/vizqlDataServiceApi.js';
+import { QueryOutput, QueryRequest, vizqlDataServiceApis } from '../apis/vizqlDataServiceApi.js';
+import { Credentials } from '../types/credentials.js';
 import AuthenticatedMethods from './authenticatedMethods.js';
 
-export default class VizqlDataServiceMethods extends AuthenticatedMethods {
-  private _apiClient: VizqlDataServiceApiClient;
-
-  constructor(baseUrl: string, token: string) {
-    super(token);
-    this._apiClient = getApiClient(baseUrl);
+export default class VizqlDataServiceMethods extends AuthenticatedMethods<
+  typeof vizqlDataServiceApis
+> {
+  constructor(baseUrl: string, creds: Credentials) {
+    super(new Zodios(baseUrl, vizqlDataServiceApis), creds);
   }
 
   queryDatasource = async (

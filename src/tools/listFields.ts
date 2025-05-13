@@ -1,7 +1,7 @@
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 import { config } from '../config.js';
-import RestApi from '../sdks/tableau/restApi.js';
+import { getNewRestApiInstanceAsync } from '../restApiInstance.js';
 import { getToolCallback, Tool } from './tool.js';
 
 export const listFieldsTool = new Tool({
@@ -20,8 +20,8 @@ export const listFieldsTool = new Tool({
       }
     }`;
 
-    return await getToolCallback(async () => {
-      const restApi = await RestApi.getNewInstanceAsync(config.server, config.authConfig);
+    return await getToolCallback(async (requestId) => {
+      const restApi = await getNewRestApiInstanceAsync(config.server, config.authConfig, requestId);
       const response = await restApi.metadataMethods.graphql(query);
       const published = response.data.publishedDatasources;
 

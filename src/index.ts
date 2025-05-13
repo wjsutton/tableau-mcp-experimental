@@ -1,13 +1,26 @@
+#!/usr/bin/env node
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
+import { config } from './config.js';
+import { log, setLogLevel } from './logging/log.js';
 import { server } from './server.js';
 
-async function main(): Promise<void> {
+async function startServer(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  setLogLevel(config.defaultLogLevel);
+
+  log.info(`${server.name} v${server.version} running on stdio`);
+  if (config.disableLogMasking) {
+    process.stderr.write('Log masking is disabled!');
+  }
 }
 
-main().catch((error) => {
-  console.error('Fatal error in main():', error);
+try {
+  await startServer();
+} catch (error) {
+  const message = error instanceof Error ? error.message : `${error}`;
+  process.stderr.write(`Fatal error when starting the server:, ${message}`);
   process.exit(1);
-});
+}
