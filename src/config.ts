@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-
 import { AuthConfig } from './sdks/tableau/authConfig.js';
 import { isToolName, ToolName } from './tools/toolName.js';
 import invariant from './utils/invariant.js';
@@ -13,8 +11,6 @@ class Config {
   excludeTools: Array<ToolName>;
 
   constructor() {
-    dotenv.config();
-
     let { SITE_NAME: siteName } = process.env;
     const {
       SERVER: server,
