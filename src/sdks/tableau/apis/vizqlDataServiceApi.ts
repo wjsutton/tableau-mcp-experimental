@@ -174,6 +174,12 @@ const vizqlDataServiceApi = makeApi([
       },
     ],
     response: QueryOutput,
+    errors: [
+      {
+        status: 'default',
+        schema: TableauError,
+      },
+    ],
   },
   {
     method: 'post',
