@@ -8,7 +8,7 @@ const Connection = z.object({
 });
 
 export const Datasource = z.object({
-  datasourceLuid: z.string(),
+  datasourceLuid: z.string().nonempty(),
   connections: z.array(Connection).optional(),
 });
 
@@ -29,7 +29,7 @@ export const ReadMetadataRequest = z
   })
   .passthrough();
 
-const Function = z.enum([
+export const Function = z.enum([
   'SUM',
   'AVG',
   'MEDIAN',
@@ -50,6 +50,9 @@ const Function = z.enum([
   'TRUNC_MONTH',
   'TRUNC_WEEK',
   'TRUNC_DAY',
+  'AGG',
+  'NONE',
+  'UNSPECIFIED',
 ]);
 
 const FieldMetadata = z
@@ -106,7 +109,7 @@ export const Field = z.union([
   FieldBase.extend({ calculation: z.string() }).strict(),
 ]);
 
-const FilterField = z.union([
+export const FilterField = z.union([
   z.object({ fieldCaption: z.string() }).strict(),
   z.object({ fieldCaption: z.string(), function: Function }).strict(),
   z.object({ calculation: z.string() }).strict(),
@@ -114,25 +117,25 @@ const FilterField = z.union([
 
 const FilterBase = z.object({
   field: FilterField,
-  context: z.boolean().optional().default(false),
+  context: z.boolean().optional(),
 });
 
 const SimpleFilterBase = z.object({
   field: z.object({ fieldCaption: z.string() }).strict(),
-  context: z.boolean().optional().default(false),
+  context: z.boolean().optional(),
 });
 
-const SetFilter = SimpleFilterBase.extend({
+export const SetFilter = SimpleFilterBase.extend({
   filterType: z.literal('SET'),
   values: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
-  exclude: z.boolean().optional().default(false),
+  exclude: z.boolean().optional(),
 });
 
 const RelativeDateFilterBase = SimpleFilterBase.extend({
   filterType: z.literal('DATE'),
   periodType: z.enum(['MINUTES', 'HOURS', 'DAYS', 'WEEKS', 'MONTHS', 'QUARTERS', 'YEARS']),
   anchorDate: z.string().optional(),
-  includeNulls: z.boolean().optional().default(false),
+  includeNulls: z.boolean().optional(),
 });
 
 const RelativeDateFilter = z.discriminatedUnion('dateRangeType', [
@@ -140,8 +143,14 @@ const RelativeDateFilter = z.discriminatedUnion('dateRangeType', [
   RelativeDateFilterBase.extend({ dateRangeType: z.literal('LAST') }).strict(),
   RelativeDateFilterBase.extend({ dateRangeType: z.literal('NEXT') }).strict(),
   RelativeDateFilterBase.extend({ dateRangeType: z.literal('TODATE') }).strict(),
-  RelativeDateFilterBase.extend({ dateRangeType: z.literal('LASTN'), rangeN: z.number() }).strict(),
-  RelativeDateFilterBase.extend({ dateRangeType: z.literal('NEXTN'), rangeN: z.number() }).strict(),
+  RelativeDateFilterBase.extend({
+    dateRangeType: z.literal('LASTN'),
+    rangeN: z.number().int(),
+  }).strict(),
+  RelativeDateFilterBase.extend({
+    dateRangeType: z.literal('NEXTN'),
+    rangeN: z.number().int(),
+  }).strict(),
 ]);
 
 const MatchFilterBase = SimpleFilterBase.extend({
@@ -149,10 +158,10 @@ const MatchFilterBase = SimpleFilterBase.extend({
   startsWith: z.string().optional(),
   endsWith: z.string().optional(),
   contains: z.string().optional(),
-  exclude: z.boolean().optional().default(false),
+  exclude: z.boolean().optional(),
 });
 
-const MatchFilter = z.union([
+export const MatchFilter = z.union([
   MatchFilterBase.extend({ startsWith: z.string() }).strict(),
   MatchFilterBase.extend({ endsWith: z.string() }).strict(),
   MatchFilterBase.extend({ contains: z.string() }).strict(),
@@ -167,17 +176,17 @@ const QuantitativeNumericalFilter = z.discriminatedUnion('quantitativeFilterType
     quantitativeFilterType: z.literal('RANGE'),
     min: z.number(),
     max: z.number(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeNumericalFilterBase.extend({
     quantitativeFilterType: z.literal('MIN'),
     min: z.number(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeNumericalFilterBase.extend({
     quantitativeFilterType: z.literal('MAX'),
     max: z.number(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeNumericalFilterBase.extend({
     quantitativeFilterType: z.literal('ONLY_NULL'),
@@ -196,17 +205,17 @@ const QuantitativeDateFilter = z.discriminatedUnion('quantitativeFilterType', [
     quantitativeFilterType: z.literal('RANGE'),
     minDate: z.string(),
     maxDate: z.string(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeDateFilterBase.extend({
     quantitativeFilterType: z.literal('MIN'),
     minDate: z.string(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeDateFilterBase.extend({
     quantitativeFilterType: z.literal('MAX'),
     maxDate: z.string(),
-    includeNulls: z.boolean().optional().default(false),
+    includeNulls: z.boolean().optional(),
   }).strict(),
   QuantitativeDateFilterBase.extend({
     quantitativeFilterType: z.literal('ONLY_NULL'),
@@ -216,9 +225,9 @@ const QuantitativeDateFilter = z.discriminatedUnion('quantitativeFilterType', [
   }).strict(),
 ]);
 
-const TopNFilter = FilterBase.extend({
+export const TopNFilter = FilterBase.extend({
   filterType: z.literal('TOP'),
-  howMany: z.number(),
+  howMany: z.number().int(),
   fieldToMeasure: FilterField,
   direction: z.enum(['TOP', 'BOTTOM']).optional().default('TOP'),
 });
@@ -240,7 +249,7 @@ export const Query = z.strictObject({
 const QueryDatasourceOptions = QueryOptions.and(
   z
     .object({
-      disaggregate: z.boolean().default(false),
+      disaggregate: z.boolean(),
     })
     .partial()
     .passthrough(),

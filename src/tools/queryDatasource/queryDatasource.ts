@@ -7,6 +7,7 @@ import { Datasource, Query, TableauError } from '../../sdks/tableau/apis/vizqlDa
 import { Tool } from '../tool.js';
 import { getDatasourceCredentials } from './datasourceCredentials.js';
 import { handleQueryDatasourceError } from './queryDatasourceErrorHandler.js';
+import { validateQuery } from './queryDatasourceValidator.js';
 import { queryDatasourceToolDescription } from './queryDescription.js';
 
 type Datasource = z.infer<typeof Datasource>;
@@ -15,7 +16,7 @@ export const queryDatasourceTool = new Tool({
   name: 'query-datasource',
   description: queryDatasourceToolDescription,
   paramsSchema: {
-    datasourceLuid: z.string(),
+    datasourceLuid: z.string().nonempty(),
     query: Query,
   },
   annotations: {
@@ -23,6 +24,7 @@ export const queryDatasourceTool = new Tool({
     readOnlyHint: true,
     openWorldHint: false,
   },
+  argsValidator: validateQuery,
   callback: async ({ datasourceLuid, query }): Promise<CallToolResult> => {
     const config = getConfig();
     return await queryDatasourceTool.logAndExecute({
@@ -54,8 +56,8 @@ export const queryDatasourceTool = new Tool({
 
         return await restApi.vizqlDataServiceMethods.queryDatasource(queryRequest);
       },
-      getErrorText: (error: z.infer<typeof TableauError>) => {
-        return JSON.stringify(handleQueryDatasourceError(error));
+      getErrorText: (requestId: string, error: z.infer<typeof TableauError>) => {
+        return JSON.stringify({ requestId, ...handleQueryDatasourceError(error) });
       },
     });
   },
