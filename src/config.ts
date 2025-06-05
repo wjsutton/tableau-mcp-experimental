@@ -17,13 +17,6 @@ class Config {
       SERVER: server,
       PAT_NAME: patName,
       PAT_VALUE: patValue,
-      USERNAME: username,
-      PASSWORD: password,
-      CONNECTED_APP_CLIENT_ID: clientId,
-      CONNECTED_APP_SECRET_ID: secretId,
-      CONNECTED_APP_SECRET_VALUE: secretValue,
-      JWT_SCOPES: scopes,
-      AUTH_TYPE: authType,
       DATASOURCE_CREDENTIALS: datasourceCredentials,
       DEFAULT_LOG_LEVEL: defaultLogLevel,
       DISABLE_LOG_MASKING: disableLogMasking,
@@ -55,60 +48,17 @@ class Config {
     }
 
     invariant(server, 'The environment variable SERVER is not set');
+    invariant(patName, 'The environment variable PAT_NAME is not set');
+    invariant(patValue, 'The environment variable PAT_VALUE is not set');
 
     this.server = server;
 
-    if (patName && patValue && (!authType || authType === 'pat')) {
-      this.authConfig = {
-        type: 'pat',
-        patName,
-        patValue,
-        siteName,
-      };
-
-      return;
-    }
-
-    if (
-      username &&
-      clientId &&
-      secretId &&
-      secretValue &&
-      (!authType || authType === 'direct-trust')
-    ) {
-      this.authConfig = {
-        type: 'direct-trust',
-        username,
-        clientId,
-        secretId,
-        secretValue,
-        siteName,
-        scopes: [
-          ...new Set([
-            'tableau:viz_data_service:read',
-            'tableau:content:read',
-            ...(scopes?.split(',') ?? []),
-          ]),
-        ],
-      };
-
-      return;
-    }
-
-    if (username && password && (!authType || authType === 'username-password')) {
-      this.authConfig = {
-        type: 'username-password',
-        username,
-        password,
-        siteName,
-      };
-
-      return;
-    }
-
-    throw new Error(
-      'No authentication method could be determined. Ensure the environment variables are set.',
-    );
+    this.authConfig = {
+      type: 'pat',
+      patName,
+      patValue,
+      siteName,
+    };
   }
 }
 
