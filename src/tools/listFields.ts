@@ -30,13 +30,14 @@ export const listFieldsTool = new Tool({
     openWorldHint: false,
   },
   argsValidator: validateDatasourceLuid,
-  callback: async ({ datasourceLuid }): Promise<CallToolResult> => {
+  callback: async ({ datasourceLuid }, { requestId }): Promise<CallToolResult> => {
     const config = getConfig();
     const query = getGraphqlQuery(datasourceLuid);
 
     return await listFieldsTool.logAndExecute({
+      requestId,
       args: { datasourceLuid },
-      callback: async (requestId) => {
+      callback: async () => {
         const restApi = await getNewRestApiInstanceAsync(
           config.server,
           config.authConfig,

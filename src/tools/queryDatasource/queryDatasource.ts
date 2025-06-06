@@ -25,11 +25,12 @@ export const queryDatasourceTool = new Tool({
     openWorldHint: false,
   },
   argsValidator: validateQuery,
-  callback: async ({ datasourceLuid, query }): Promise<CallToolResult> => {
+  callback: async ({ datasourceLuid, query }, { requestId }): Promise<CallToolResult> => {
     const config = getConfig();
     return await queryDatasourceTool.logAndExecute({
+      requestId,
       args: { datasourceLuid, query },
-      callback: async (requestId) => {
+      callback: async () => {
         const datasource: Datasource = { datasourceLuid };
         const options = {
           returnFormat: 'OBJECTS',
@@ -56,7 +57,7 @@ export const queryDatasourceTool = new Tool({
 
         return await restApi.vizqlDataServiceMethods.queryDatasource(queryRequest);
       },
-      getErrorText: (requestId: string, error: z.infer<typeof TableauError>) => {
+      getErrorText: (error: z.infer<typeof TableauError>) => {
         return JSON.stringify({ requestId, ...handleQueryDatasourceError(error) });
       },
     });
