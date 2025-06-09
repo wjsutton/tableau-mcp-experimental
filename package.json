@@ -1,7 +1,7 @@
 {
   "name": "tableau-mcp",
   "description": "A MCP server for Tableau, providing a suite of tools that will make it easier for developers to build AI-applications that integrate with Tableau.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/tableau/tableau-mcp",
   "bugs": "https://github.com/tableau/tableau-mcp/issues",
   "author": "Tableau",
@@ -26,7 +26,10 @@
     "build:inspect:docker": "npm run build && npm run inspect:docker",
     "exec-perms": "shx chmod +x build/*.js",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "version:major": "npm version major --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:patch": "npm version patch --no-git-tag-version"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
