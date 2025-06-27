@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { getConfig } from '../../config.js';
 import { getNewRestApiInstanceAsync } from '../../restApiInstance.js';
+import { paginate } from '../../utils/paginate.js';
 import { Tool } from '../tool.js';
 import { parseAndValidateFilterString } from './datasourcesFilterUtils.js';
 
@@ -80,27 +81,48 @@ Retrieves a list of published data sources from a specified Tableau site using t
 `,
   paramsSchema: {
     filter: z.string().optional(),
+    pageSize: z.number().gt(0).optional(),
+    limit: z.number().gt(0).optional(),
   },
   annotations: {
     title: 'List Datasources',
     readOnlyHint: true,
     openWorldHint: false,
   },
-  callback: async ({ filter }, { requestId }): Promise<CallToolResult> => {
+  callback: async ({ filter, pageSize, limit }, { requestId }): Promise<CallToolResult> => {
     const config = getConfig();
     const validatedFilter = filter ? parseAndValidateFilterString(filter) : undefined;
     return await listDatasourcesTool.logAndExecute({
       requestId,
-      args: { filter },
+      args: { filter, pageSize, limit },
       callback: async () => {
         const restApi = await getNewRestApiInstanceAsync(
           config.server,
           config.authConfig,
           requestId,
         );
-        return new Ok(
-          await restApi.datasourcesMethods.listDatasources(restApi.siteId, validatedFilter ?? ''),
-        );
+
+        const datasources = await paginate({
+          pageConfig: {
+            pageSize,
+            limit: config.maxResultLimit
+              ? Math.min(config.maxResultLimit, limit ?? Number.MAX_SAFE_INTEGER)
+              : limit,
+          },
+          getDataFn: async (pageConfig) => {
+            const { pagination, datasources: data } =
+              await restApi.datasourcesMethods.listDatasources({
+                siteId: restApi.siteId,
+                filter: validatedFilter ?? '',
+                pageSize: pageConfig.pageSize,
+                pageNumber: pageConfig.pageNumber,
+              });
+
+            return { pagination, data };
+          },
+        });
+
+        return new Ok(datasources);
       },
     });
   },
