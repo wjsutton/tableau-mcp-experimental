@@ -3,7 +3,7 @@ import { Ok } from 'ts-results-es';
 import z from 'zod';
 
 import { getConfig } from '../../../config.js';
-import { getNewRestApiInstanceAsync } from '../../../restApiInstance.js';
+import { useRestApi } from '../../../restApiInstance.js';
 import {
   pulseBundleRequestSchema,
   pulseInsightBundleTypeEnum,
@@ -142,17 +142,17 @@ Generate an insight bundle for the current aggregated value for Pulse Metric usi
         requestId,
         args: { bundleRequest, bundleType },
         callback: async () => {
-          const restApi = await getNewRestApiInstanceAsync(
-            config.server,
-            config.authConfig,
-            requestId,
-            server,
-          );
           return new Ok(
-            await restApi.pulseMethods.generatePulseMetricValueInsightBundle(
-              bundleRequest,
-              bundleType ?? 'ban',
-            ),
+            await useRestApi({
+              config,
+              requestId,
+              server,
+              callback: async (restApi) =>
+                await restApi.pulseMethods.generatePulseMetricValueInsightBundle(
+                  bundleRequest,
+                  bundleType ?? 'ban',
+                ),
+            }),
           );
         },
       });

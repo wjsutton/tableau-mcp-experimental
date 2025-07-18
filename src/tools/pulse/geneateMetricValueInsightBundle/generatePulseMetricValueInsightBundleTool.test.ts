@@ -6,11 +6,13 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../restApiInstance.js', () => ({
-  getNewRestApiInstanceAsync: vi.fn().mockResolvedValue({
-    pulseMethods: {
-      generatePulseMetricValueInsightBundle: mocks.mockGeneratePulseMetricValueInsightBundle,
-    },
-  }),
+  useRestApi: vi.fn().mockImplementation(async ({ callback }) =>
+    callback({
+      pulseMethods: {
+        generatePulseMetricValueInsightBundle: mocks.mockGeneratePulseMetricValueInsightBundle,
+      },
+    }),
+  ),
 }));
 
 describe('getGeneratePulseMetricValueInsightBundleTool', () => {
