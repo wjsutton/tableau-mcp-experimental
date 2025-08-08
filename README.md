@@ -26,8 +26,11 @@ The following MCP tools are currently implemented:
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | list-datasources                                  | Retrieves a list of published data sources from a specified Tableau site ([REST API][query])   |
 | list-fields                                       | Fetches field metadata (name, description) for the specified datasource ([Metadata API][meta]) |
+| **list-fields-fixed**                             | **Fetches field metadata for a pre-configured datasource (uses FIXED_DATASOURCE_LUID)**        |
 | query-datasource                                  | Run a Tableau VizQL query ([VDS API][vds])                                                     |
+| **query-datasource-fixed**                        | **Run a Tableau VizQL query against a pre-configured datasource (uses FIXED_DATASOURCE_LUID)** |
 | read-metadata                                     | Requests metadata for the specified data source ([VDS API][vds])                               |
+| **read-metadata-fixed**                           | **Requests metadata for a pre-configured datasource (uses FIXED_DATASOURCE_LUID)**             |
 | list-all-pulse-metric-definitions                 | List All Pulse Metric Definitions ([Pulse API][pulse])                                         |
 | list-pulse-metric-definitions-from-definition-ids | List Pulse Metric Definitions from Metric Definition IDs ([Pulse API][pulse])                  |
 | list-pulse-metrics-from-metric-definition-id      | List Pulse Metrics from Metric Definition ID ([Pulse API][pulse])                              |
@@ -38,6 +41,45 @@ The following MCP tools are currently implemented:
 Note: The Tableau MCP project is currently in early development. As we continue to enhance and
 refine the implementation, the available functionality and tools may evolve. We welcome feedback and
 contributions to help shape the future of this project.
+
+## Fixed Datasource Tools
+
+The tools marked in **bold** above are "fixed datasource" variants that operate on a pre-configured datasource. These tools simplify AI workflows by eliminating the need to repeatedly specify the datasource LUID parameter.
+
+### Benefits
+- **Simplified Usage**: No need to specify `datasourceLuid` parameter for each call
+- **Consistent Context**: All queries operate on the same datasource, maintaining context across conversations
+- **Reduced Errors**: Eliminates datasource LUID typos and lookup overhead
+- **Streamlined Workflows**: Perfect for focused analysis sessions on a specific dataset
+
+### Configuration
+Set the `FIXED_DATASOURCE_LUID` environment variable to your datasource's LUID:
+
+```bash
+# Via environment variable
+export FIXED_DATASOURCE_LUID=abc123-def456-789
+
+# Via .env file
+echo "FIXED_DATASOURCE_LUID=abc123-def456-789" >> .env
+
+# Via MCP configuration (Claude Desktop, Cursor, etc.)
+{
+  "mcpServers": {
+    "tableau": {
+      "env": {
+        "FIXED_DATASOURCE_LUID": "abc123-def456-789"
+      }
+    }
+  }
+}
+```
+
+### Available Fixed Tools
+- **`list-fields-fixed`**: Rich field metadata via Metadata API (no parameters)
+- **`read-metadata-fixed`**: Basic datasource metadata via VDS API (no parameters)  
+- **`query-datasource-fixed`**: Full VizQL querying with advanced filtering (only `query` parameter)
+
+All fixed tools maintain the same functionality as their parameterized counterparts but operate exclusively on the configured datasource.
 
 ## Getting Started
 
@@ -198,6 +240,7 @@ These config files will be used in tool configuration explained below.
 | `EXCLUDE_TOOLS`                              | A comma-separated list of tool names to exclude from the server. All other tools will be available. | Empty string (_none_ are excluded) | Cannot be provided with `INCLUDE_TOOLS`.                                                                                                                                                    |
 | `MAX_RESULT_LIMIT`                           | If a tool has a "limit" parameter and returns an array of items, the maximum length of that array.  | Empty string (_no limit_)          | A positive number.                                                                                                                                                                          |
 | `DISABLE_QUERY_DATASOURCE_FILTER_VALIDATION` | Disable validation of SET and MATCH filter values in query-datasource tool.                         | `false`                            | When `true`, skips validation that checks if filter values exist in the target field.                                                                                                       |
+| `FIXED_DATASOURCE_LUID`                      | Datasource LUID for fixed datasource tools (list-fields-fixed, read-metadata-fixed, query-datasource-fixed). | Empty string                       | When set, enables the fixed datasource tools that operate without requiring datasourceLuid parameters.                                                                                      |
 
 #### HTTP Server Configuration
 

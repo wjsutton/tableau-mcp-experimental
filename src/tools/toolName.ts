@@ -1,8 +1,11 @@
 export const toolNames = [
   'list-datasources',
   'list-fields',
+  'list-fields-fixed',
   'query-datasource',
+  'query-datasource-fixed',
   'read-metadata',
+  'read-metadata-fixed',
   'list-all-pulse-metric-definitions',
   'list-pulse-metric-definitions-from-definition-ids',
   'list-pulse-metrics-from-metric-definition-id',
